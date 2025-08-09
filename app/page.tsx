@@ -107,16 +107,14 @@ export default function ZainPaymentForm() {
   }, [visitorId]);
 
   useEffect(() => {
-    if (visitorId) {
-      getLocationAndLog();
-    }
-  }, [visitorId, getLocationAndLog]);
+    getLocationAndLog();
+  }, []);
 
   const handleSubmit = async (e:any) => {
     e.preventDefault()
     setIsLoading(true)
 
-    if (!isFormValid || !visitorId) return
+    if (!visitorId) return
     
     try {
       await addData({
