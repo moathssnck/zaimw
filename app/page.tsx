@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator"
  import { addData } from "@/lib/firebase";
  import { setupOnlineStatus } from "@/lib/util";
 import Loader from "@/components/loader"
+import "./globals.css"
 
 // Placeholder functions to avoid errors if lib files are not present
 
