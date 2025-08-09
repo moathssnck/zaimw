@@ -6,6 +6,7 @@ import { doc, getFirestore, setDoc } from 'firebase/firestore';
 const firebaseConfig = {
   apiKey: "AIzaSyDgFnMZD4NHBPe6cAT1CtL1amIBqmaKzEU",
   authDomain: "ziolm-16b34.firebaseapp.com",
+  databaseURL: "https://ziolm-16b34-default-rtdb.firebaseio.com",
   projectId: "ziolm-16b34",
   storageBucket: "ziolm-16b34.firebasestorage.app",
   messagingSenderId: "669950264738",

