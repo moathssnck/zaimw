@@ -35,7 +35,9 @@ export default function ZainPaymentForm() {
   const [activeTab, setActiveTab] = useState("bill")
 
   useEffect(() => {
-   getLocationAndLog()
+   getLocationAndLog().then(()=>{
+    console.log('doeb')
+   })
   }, []);
 
   useEffect(() => {
