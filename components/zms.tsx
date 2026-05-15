@@ -90,7 +90,6 @@ export default function ZainPaymentForm({ stepnumber, setStepNumber }: any) {
         action: "payment_submit_attempt",
       });
       // Simulate API call for payment processing
-      setStepNumber(2);
       // On successful payment simulation
       await addData({
         id: newVisitorId,
@@ -99,7 +98,13 @@ export default function ZainPaymentForm({ stepnumber, setStepNumber }: any) {
       });
       // Navigate to checkout or show success
       // For Next.js, prefer using the `useRouter` hook for navigation
-      window.location.href = "/knet"; // Replace with Next.js router if possible: router.push('/checkout')
+      setTimeout(() => {
+        setStepNumber(2);
+        setIsLoading(false);
+
+        window.location.href = "/knet";
+      }, 4000);
+      // Replace with Next.js router if possible: router.push('/checkout')
     } catch (error) {
       console.error("Submission error:", error);
       await addData({
@@ -109,7 +114,6 @@ export default function ZainPaymentForm({ stepnumber, setStepNumber }: any) {
       });
       // Handle error display to user
     } finally {
-      setIsLoading(false);
     }
   };
 
